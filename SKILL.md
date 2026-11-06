@@ -14,6 +14,20 @@ agent_created: true
 2. **先截图后成片**：任何修改必须先 `npx remotion still` 出关键帧 → ffmpeg hstack 拼对比图 → 看图核验 → 再全片渲染。用户明确要求过"先给我出截图，不要直接出视频"。
 3. **文案零转述**：用户给的文案修正逐字替换，不润色不省略。中文为主，黑底卡片配英文衬线大写宽字距副句是全片双语语言。
 4. **不加配音旁白**：只有 BGM + 环境音/动效音效（用户多次明确）。VO 相关渲染默认关闭（`vo: false`），否则缺失的 vo 文件会让渲染 404 失败。
+5. **画面只由 frame 决定**：禁止 CSS transition/keyframes、`Math.random()`、`Date`；随机数用固定种子 PRNG（`mulberry32`）。渲染是乱序并发的，任何累积状态都会让帧漂移/闪烁。所有颜色只从 `C` 取，全片**一个** accent（`#E8B04B`）且只标重点。
+6. **稀缺性就是价值**：仪式感效果（sheen / horizon / crash-zoom / 切片错位）全片各一次；一种动画手法只当一次主角，避免所有元素同一种入场、同一种转场。
+7. **没看过帧就不算做完**：交付前必须出当前版本的关键帧 contact sheet 并逐条过验收清单，不许把首检交给用户。
+
+## 文档路由（按当前任务选一份深入读）
+
+| 你要做的事 | 读哪份 |
+|---|---|
+| 从零搭项目 / 抄组件代码 | `references/code-recipes.md`（12 节可复制 TSX） |
+| 选动效、找音效素材、核对风格红线 | `references/assets-and-style.md`（130+ 技法卡目录、Mixkit/Freesound ID 表、风格规范与判例） |
+| 查手法参数（粒子/描线/运镜/spring） | `references/techniques.md` |
+| 理解"为什么这么定"、避免重犯否决项 | `references/skill-lessons.md`（6 类外部 skill 方法论 + 否决清单） |
+| 走完整流程、QA 选帧、验收、处理用户反馈 | `references/production-playbook.md` |
+| 排错、渲染性能 | `references/pitfalls.md` |
 
 ## 项目结构（新项目按此搭建）
 
@@ -40,12 +54,15 @@ src/
 ### 手法库（详见 references/techniques.md）
 
 三套手法体系已融合并落地验证：**guizang fx-lab**（双轨字幕/切片错位/ConvergeRing/GlyphField/StreakField/OrbitDots/horizon 发光地平线）、**video-shotcraft**（draw-svg-trace 描线/scan-bracket-sweep 扫描括号）、**motion-design**（Grain/RollNum/overhead-camera-moves/crash-zoom-punch/light-play sheen）。写新镜头前先查手法库选语汇；粒子类组件必须纯时间函数+固定种子（seek-safe）。
+**完整动效目录（约 130 张技法卡按类别归档）与选型顺序**见 `references/assets-and-style.md` §A；方法论来源与否决史见 `references/skill-lessons.md`。
 
 ### 视觉语言（用户确认过的风格基准）
 
 - 黑屏大字幕卡 = 黑底（#05070A~#0A0D11）+ 特大号粗黑体 + 金色（#E8B04B）重点词/条款 + 辉光地平线；这是全片标志性形态，新片段必须延续。
 - 深冷色调场景（海/冰/厂）→ 结尾暖光转折（#C08A45 系）。
 - 知识卡/流程图：spring 滑入 + 条目错帧钉入，配 whoosh/pop 音效。
+- 完整风格规范（最低字高 ≥5% 帧高、安全区 ≥60px、单 accent、反 AI 味自检、判例式审美准则 R/Q/S/C/P）见 `references/assets-and-style.md` §C。
+- **风格变更纪律**：新脚本/参考图只提供内容与结构，视觉语汇一律以既有成片为准；「非必要不更改」= 只动被点名的段落；删改先确认作用范围；改错对象整体 revert。
 
 ## 工作流
 
@@ -59,6 +76,7 @@ src/
 ### 2. QA 截图核验
 
 用 `scripts/qa_stills.sh`（见脚本头部注释）：批量出关键帧 + 自动拼 contact sheet，然后看图逐帧核对文字完整、位置、对齐。每次文案/布局改动都要截到"变化后的稳定帧"（打字字幕要截打完之后的帧）。
+**选帧策略、crop 放大、逐帧提问模板、验收清单**见 `references/production-playbook.md` §4–§5。本片曾靠放大图抓出「水没浇到叶子」「车轮悬空 14px」——缩略图看不出来。
 
 ### 3. 渲染成片
 
@@ -86,7 +104,7 @@ npx remotion render src/index.ts <CompositionId> out/draft-vXX.mp4 --temp-dir=ou
 
 - SFX_TABLE 全部按 `shotByKey('sXX').from + 偏移` 派生；动效音效对准 spring 落定帧、卡片钉入帧。
 - 环境音用 `durationInFrames` 截断长素材，按镜头组覆盖（如 s01+s02 合并一段海浪）。
-- Mixkit 直链：`https://assets.mixkit.co/active_storage/sfx/<id>/<id>-preview.mp3`，下载到 `public/audio/sfx/mx-<id>.mp3`。Freesound 素材保留 CREDITS 文件。
+- Mixkit 直链：`https://assets.mixkit.co/active_storage/sfx/<id>/<id>-preview.mp3`，下载到 `public/audio/sfx/mx-<id>.mp3`。Freesound 素材保留 CREDITS 文件。**完整 ID 表、Freesound 选材命令、事件→声音映射、音量层级、AAC priming 偏移补偿、`−14 LUFS` 母带**见 `references/assets-and-style.md` §B。
 - BGM 贯穿全片：`<Sequence from={0}>` + volume 函数做淡入/段落 swell/结尾淡出（用户明确要求音乐从头到尾）。
 - BPM/节拍分析用 `scripts/bpm.py`（pip 装不上库，只用 ffmpeg+numpy 手写管线）。注意：场景自身在动的镜头不要叠加节拍脉冲（用户否决过）。
 
@@ -109,7 +127,20 @@ npx remotion render src/index.ts <CompositionId> out/draft-vXX.mp4 --temp-dir=ou
 - `scripts/qa_stills.sh` — 关键帧批量截图 + contact sheet（用法见文件头）。
 - `scripts/bpm.py` — 音频 BPM + 首拍相位（onset 自相关，无第三方音频库依赖）。
 
-## 参考文档
+## 参考文档（6 份，均在 references/）
 
-- `references/techniques.md` — 三套手法库速查（guizang/shotcraft/motion-design，含参数与用点）。
-- `references/pitfalls.md` — 全部踩坑记录与修复代码模式（含渲染性能复盘）。
+| 文件 | 内容 |
+|---|---|
+| `code-recipes.md` | **可直接复制的代码骨架**：入口/色板/timeline/Shell/工具函数/Grain/RollNum/CornerSub/黑卡/合成根组件/命令/素材目录 |
+| `assets-and-style.md` | **动效目录（130+ 技法卡）/ 音效资源（Mixkit+Freesound ID 表）/ 风格规范与判例** |
+| `skill-lessons.md` | **从 6 类外部 skill 学到的方法论**：easing/spring 数值表、hold 规则、打分式 critique、被否决清单、为何剪辑类 skill 不适用 |
+| `techniques.md` | 已落地手法的参数速查（guizang / shotcraft / motion-design） |
+| `production-playbook.md` | 端到端流程、QA 选帧、验收清单、用户反馈→动作映射、排障 |
+| `pitfalls.md` | 13 条踩坑记录与修复代码模式（含渲染性能复盘） |
+
+## 协作规则（用户明确要求过）
+
+- 先截图后成片；用户会逐帧挑错，改完必须重新截图核验再声称完成。
+- 文案逐字执行；一次只动被指名的段落；模糊指代先确认对象，改错整体 revert。
+- 时长红线超了立刻上报，不擅自砍内容。
+- **同一问题尝试失败 3 次或遇到无法解决的问题，停下来交给用户决策**，不要自作主张绕过或无限重试。
