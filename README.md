@@ -8,14 +8,23 @@ An agent skill for producing motion-documentary films entirely in Remotion — t
 
 ```
 remotion-doc-film/
-├── SKILL.md                  # 主工作流：时间轴单一事实源 / 先截图后成片 / 节奏规则 / 声音体系
+├── SKILL.md                     # 主工作流 + 文档路由表
 ├── references/
-│   ├── pitfalls.md           # 13 条实战踩坑记录与修复代码模式
-│   └── techniques.md         # 手法库速查（字幕制式/运镜/粒子场/描线/音效对位，含参数）
+│   ├── code-recipes.md          # 12 节可直接复制的 TSX 骨架（入口/色板/timeline/积木/合成根）
+│   ├── assets-and-style.md      # 动效目录(130+技法卡) / 音效资源(ID表+下载+钉帧) / 风格规范与判例
+│   ├── skill-lessons.md         # 从 6 类外部 skill 学到的方法论 + 否决清单
+│   ├── techniques.md            # 已落地手法参数速查
+│   ├── production-playbook.md   # 端到端流程 / QA 选帧 / 验收清单 / 反馈映射 / 排障
+│   └── pitfalls.md              # 13 条踩坑记录与修复模式（含渲染性能复盘）
 └── scripts/
-    ├── qa_stills.sh          # 关键帧批量截图 + contact sheet 拼图
-    └── bpm.py                # 音频 BPM + 首拍相位分析（ffmpeg + numpy，无第三方音频库）
+    ├── qa_stills.sh             # 关键帧批量截图 + contact sheet 拼图
+    └── bpm.py                   # 音频 BPM + 首拍相位分析（ffmpeg + numpy，无第三方音频库）
 ```
+
+来源：用户下载的 motion-design / motion-design-howseen / hyperframes-student-kit，
+以及环境自带的 guizang-product-video-skill / video-shotcraft / review-loop / sound-design /
+video-storytelling / hyperframes-video-beats。哪些真正进片、哪些被否决、为什么剪辑类 skill 用不上，
+都在 `references/skill-lessons.md` 里有完整账目。
 
 ## 核心原则
 
